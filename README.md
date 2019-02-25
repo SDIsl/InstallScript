@@ -29,5 +29,7 @@ sudo ./odoo_install.sh
 ```
 
 ##### 5. Install requeriments:
+```
 wget https://raw.githubusercontent.com/sdisl/InstallScript/11.0/requeriments.txt
 pip3 install -r requirements.txt
+```
