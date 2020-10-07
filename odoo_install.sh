@@ -55,7 +55,7 @@ echo -e "\n---- Install PostgreSQL Server ----"
 sudo apt-get install postgresql -y
 
 echo -e "\n---- Creating the ODOO PostgreSQL User  ----"
-sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
+su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 
 #--------------------------------------------------
 # Install Dependencies
@@ -101,13 +101,11 @@ else
 fi
 
 echo -e "\n---- Create ODOO system user ----"
-sudo adduser --system --quiet --shell=/bin/bash --home=$OE_HOME --gecos 'ODOO' --group $OE_USER
-#The user should also be added to the sudo'ers group.
-sudo adduser $OE_USER sudo
+adduser --system --group --quiet --home=$OE_HOME  $OE_USER
 
 echo -e "\n---- Create Log directory ----"
-sudo mkdir /var/log/$OE_USER
-sudo chown $OE_USER:$OE_USER /var/log/$OE_USER
+mkdir /var/log/$OE_USER
+chown $OE_USER:$OE_USER /var/log/$OE_USER
 
 #--------------------------------------------------
 # Install ODOO
@@ -142,11 +140,10 @@ if [ $IS_ENTERPRISE = "True" ]; then
 fi
 
 echo -e "\n---- Create custom module directory ----"
-sudo su $OE_USER -c "mkdir $OE_HOME/custom"
-sudo su $OE_USER -c "mkdir $OE_HOME/custom/addons"
+mkdir -p $OE_HOME/custom/addons
 
 echo -e "\n---- Setting permissions on home folder ----"
-sudo chown -R $OE_USER:$OE_USER $OE_HOME/*
+chown -R $OE_USER:$OE_USER $OE_HOME/*
 
 echo -e "* Create server config file"
 
@@ -241,23 +238,26 @@ exit 0
 EOF
 
 echo -e "* Security Init File"
-sudo mv ~/$OE_CONFIG /etc/init.d/$OE_CONFIG
-sudo chmod 755 /etc/init.d/$OE_CONFIG
-sudo chown root: /etc/init.d/$OE_CONFIG
+mv ~/$OE_CONFIG /etc/init.d/$OE_CONFIG
+chmod 755 /etc/init.d/$OE_CONFIG
+chown root: /etc/init.d/$OE_CONFIG
 
 echo -e "* Start ODOO on Startup"
-sudo update-rc.d $OE_CONFIG defaults
+update-rc.d $OE_CONFIG defaults
 
 echo -e "* Starting Odoo Service"
-sudo su root -c "/etc/init.d/$OE_CONFIG start"
-echo "-----------------------------------------------------------"
-echo "Done! The Odoo server is up and running. Specifications:"
-echo "Port: $OE_PORT"
-echo "User service: $OE_USER"
-echo "User PostgreSQL: $OE_USER"
-echo "Code location: $OE_USER"
-echo "Addons folder: $OE_USER/$OE_CONFIG/addons/"
-echo "Start Odoo service: sudo service $OE_CONFIG start"
-echo "Stop Odoo service: sudo service $OE_CONFIG stop"
-echo "Restart Odoo service: sudo service $OE_CONFIG restart"
-echo "-----------------------------------------------------------"
+su root -c "/etc/init.d/$OE_CONFIG start"
+
+cat << EOF
+-----------------------------------------------------------
+Done! The Odoo server is up and running. Specifications:
+Port: $OE_PORT
+User service: $OE_USER
+User PostgreSQL: $OE_USER
+Code location: $OE_USER
+Addons folder: $OE_USER/$OE_CONFIG/addons/
+Start Odoo service: sudo service $OE_CONFIG start
+Stop Odoo service: sudo service $OE_CONFIG stop
+Restart Odoo service: sudo service $OE_CONFIG restart
+-----------------------------------------------------------
+EOF
